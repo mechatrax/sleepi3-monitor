@@ -1,0 +1,6 @@
+sleepi3mon /usr/sbin/
+parse_env.sh /usr/lib/sleepi3-monitor/
+monitor.yml /etc/sleepi3-monitor/
+extin.d /etc/sleepi3-monitor/
+pushsw.d /etc/sleepi3-monitor/
+voltage.d /etc/sleepi3-monitor/
