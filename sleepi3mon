@@ -1,0 +1,196 @@
+#!/usr/bin/env python3
+
+import configparser
+import subprocess
+import sys
+import time
+import os
+import yaml
+
+import sleepi
+
+
+PROGRAM_VERSION = '1.0'
+
+ENV_FILE = '/etc/default/sleepi3'
+DEFAULT_I2C_ADDRESS = '0x69'
+DEFAULT_I2C_BUS = '1'
+
+CONFIG_FILE = '/etc/sleepi3-monitor/monitor.yml'
+CONFIG_MONITORS = ['extin', 'pushsw', 'voltage']
+
+ENV = os.environ.copy()
+
+
+class Event(object):
+    def __init__(self, config):
+        self.exec = config['exec']
+        self.trigger = globals().get('is_' + config['condition'])
+        self.threshold = config['threshold'] if 'threshold' in config else 0
+        self.oneshot = config['oneshot'] if 'oneshot' in config else False
+        self.done = False
+    
+    def is_triggered(self, value):
+        result = self.trigger(value, self.threshold)
+        if self.oneshot:
+            if not result:
+                self.done = False
+        return result
+    
+    def do_action(self, env):
+        if self.oneshot:
+            if self.done:
+                return
+            else:
+                self.done = True
+        try: 
+            if os.path.isdir(self.exec):
+                for f in sorted(os.listdir(self.exec)):
+                    cmd = os.path.join(self.exec, f)
+                    if os.access(cmd, os.X_OK):
+                        subprocess.run(cmd, shell=True, env=env)
+            elif os.path.isfile(self.exec):
+                if os.access(self.exec, os.X_OK):
+                    subprocess.run(self.exec, shell=True, env=env)
+            else:
+                subprocess.run(self.exec, shell=True, env=env)
+        except OSError as e:
+            print(e)
+
+
+class Sleepi3Monitor(object):
+    def __init__(self, sleepi3, name, histsize):
+        self.sleepi3 = sleepi3
+        self.name = name
+        self.export = str.upper(self.name) + '_HISTORY'
+        self.histsize = histsize
+        self.values = []
+        self.read = globals().get('read_' + name)
+        self.events = []
+    
+    def add_events(self, action):
+        self.events.append(action)
+        
+    def update_value(self):
+        self.values.insert(0, self.read(self.sleepi3.registers))
+        if len(self.values) > self.histsize:
+            self.values = self.values[:-1]
+    
+
+def read_extin(registers):
+    return registers['external_input_count'].value
+
+
+def read_pushsw(registers):
+    return registers['push_switch_count'].value
+
+
+def read_voltage(registers):
+    v1 = registers['voltage1'].value
+    v2 = registers['voltage2'].value
+    return v1 if v1 > v2 else v2
+
+
+def is_over(value, threshold):
+    if value >= threshold:
+        return 1
+    return 0
+
+
+def is_under(value, threshold):
+    if value <= threshold:
+        return 1
+    return 0
+
+
+def is_any(value, threshold):
+    return 1
+
+
+def is_none(value, threshold):
+    return 0
+
+
+def parse_environment(path):
+    parser = configparser.ConfigParser()
+    parser.read_dict({'DEFAULT': {
+        'I2C_ADDRESS': DEFAULT_I2C_ADDRESS,
+        'I2C_BUS': DEFAULT_I2C_BUS,
+    }})
+   
+    try: 
+        with open(path, 'r') as file:
+            string = file.read()
+    except IOError as e:
+        print("Cannot access {}.".format(path))
+        exit(e)
+    
+    parser.read_string('[env]' + string)
+    env = parser['env']
+    
+    return env 
+
+
+def read_configure(path):
+    conf = {}
+    
+    try: 
+        with open(path, 'r') as file:
+            conf = yaml.load(file)
+    except IOError as e:
+        print("Cannot access {}.".format(path))
+        exit(e)
+    
+    return conf
+
+def main(args):
+    voltage_history = []
+    pushsw_history = []
+    extin_history = []
+    
+    if '-D' in args:
+        loop = True
+    else:
+        loop = False
+   
+    if '-c' in args: 
+        configs = read_configure(args[args.index('-c') + 1])
+    else:
+        configs = read_configure(CONFIG_FILE)
+    
+    env = parse_environment(ENV_FILE)
+    bus = int(env['I2C_BUS'])
+    addr = int(env['I2C_ADDRESS'], 16)
+    sleepi3 = sleepi.Sleepi3(bus, addr)
+    monitors = []
+    
+    interval = configs['common']['interval']
+    for key in CONFIG_MONITORS:
+        histsize = configs[key]['history_size']
+        mon = Sleepi3Monitor(sleepi3, key, histsize)
+        if not configs[key]['commands']:
+            continue
+        for cmd in configs[key]['commands']:
+            mon.add_events(Event(cmd))
+        monitors.append(mon)
+    
+    while True:
+        for mon in monitors:
+            mon.update_value()
+            ENV[mon.export] = "{}".format(mon.values)[1:-1]
+            for ev in mon.events:
+                if ev.is_triggered(mon.values[0]):
+                    ev.do_action(ENV)
+        if loop:
+            time.sleep(interval)
+        else:
+            break
+
+
+if __name__ == '__main__':
+    argv = sys.argv
+    try:
+        main(argv[1:])
+    except KeyboardInterrupt:
+        sys.exit(0)
+

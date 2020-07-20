@@ -1,0 +1,27 @@
+common:
+  interval: 1
+
+extin:
+  history_size: 1
+  commands:
+    - exec: /etc/sleepi3-monitor/extin.d/
+      condition: over
+      threshold: 3
+      oneshot: true
+
+pushsw:
+  history_size: 1
+  commands:
+    - exec: /etc/sleepi3-monitor/pushsw.d/
+      condition: over
+      threshold: 3
+      oneshot: true
+
+voltage:
+  history_size: 10
+  commands:
+    - exec: /etc/sleepi3-monitor/voltage.d/
+      condition: under
+      threshold: 0
+      oneshot: true
+

@@ -1,0 +1,12 @@
+[Unit]
+Description=sleepi3 monitoring daemon
+After=sleepi3-start.service
+
+[Service]
+ExecStart=/usr/sbin/sleepi3mon -D
+Restart=always
+Type=simple
+
+[Install]
+WantedBy=multi-user.target
+
