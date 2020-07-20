@@ -1,3 +1,9 @@
+sleepi3-monitor (1.0.1) buster; urgency=medium
+
+  * Fix debian packaging files
+
+ -- Masahiro Honda <honda@mechatrax.com>  Mon, 20 Jul 2020 19:09:55 +0900
+
 sleepi3-monitor (1.0.0) buster; urgency=medium
 
   * Initial release

@@ -4,5 +4,5 @@ debian/*.log
 debian/*.debhelper
 debian/*.substvars
 
-debian/sleepi2-monitor/*
+debian/sleepi3-monitor/*
 
