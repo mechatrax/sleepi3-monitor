@@ -10,10 +10,10 @@ import yaml
 import sleepi
 
 
-PROGRAM_VERSION = '1.0'
+PROGRAM_VERSION = '1.1'
 
 ENV_FILE = '/etc/default/sleepi3'
-DEFAULT_I2C_ADDRESS = '0x69'
+DEFAULT_I2C_ADDRESS = '0x6E'
 DEFAULT_I2C_BUS = '1'
 
 CONFIG_FILE = '/etc/sleepi3-monitor/monitor.yml'

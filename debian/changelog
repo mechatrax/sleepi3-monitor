@@ -1,3 +1,9 @@
+sleepi3-monitor (1.1.0) buster; urgency=medium
+
+  * Fix default i2c address
+
+ -- Masahiro Honda <honda@mechatrax.com>  Tue, 21 Jul 2020 16:26:39 +0900
+
 sleepi3-monitor (1.0.1) buster; urgency=medium
 
   * Fix debian packaging files
