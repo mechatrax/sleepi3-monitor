@@ -5,8 +5,6 @@ THRESHOLD=10000
 
 source /usr/lib/sleepi3-monitor/parse_env.sh
 
-echo ${VOLTAGE[*]}
-
 if [ ${#VOLTAGE[@]} -lt $WAIT ]
 then
   exit 0
