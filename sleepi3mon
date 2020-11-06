@@ -10,7 +10,7 @@ import yaml
 import sleepi
 
 
-PROGRAM_VERSION = '1.1'
+PROGRAM_VERSION = '1.2'
 
 ENV_FILE = '/etc/default/sleepi3'
 DEFAULT_I2C_ADDRESS = '0x6E'
@@ -28,9 +28,19 @@ class Event(object):
         self.trigger = globals().get('is_' + config['condition'])
         self.threshold = config['threshold'] if 'threshold' in config else 0
         self.oneshot = config['oneshot'] if 'oneshot' in config else False
+        if 'channel' in config:
+            if config['channel'] == 1:
+                self.channel = 1
+            elif config['channel'] == 2:
+                self.channel = 2
+            else:
+                self.channel = 0
+        else:
+            self.channel = 0
         self.done = False
     
-    def is_triggered(self, value):
+    def is_triggered(self, values):
+        value = values[self.channel]
         result = self.trigger(value, self.threshold)
         if self.oneshot:
             if not result:
@@ -62,7 +72,7 @@ class Sleepi3Monitor(object):
     def __init__(self, sleepi3, name, histsize):
         self.sleepi3 = sleepi3
         self.name = name
-        self.export = str.upper(self.name) + '_HISTORY'
+        self.export = globals().get('export_' + name)
         self.histsize = histsize
         self.values = []
         self.read = globals().get('read_' + name)
@@ -78,17 +88,47 @@ class Sleepi3Monitor(object):
     
 
 def read_extin(registers):
-    return registers['external_input_count'].value
+    return [registers['external_input_count'].value]
 
 
 def read_pushsw(registers):
-    return registers['push_switch_count'].value
+    return [registers['push_switch_count'].value]
 
 
 def read_voltage(registers):
     v1 = registers['voltage1'].value
     v2 = registers['voltage2'].value
-    return v1 if v1 > v2 else v2
+    v = v1 if v1 > v2 else v2
+    return [v, v1, v2]
+
+
+def export_history(name, values):
+    ENV[name] = "{}".format(values)[1:-1]
+    
+
+def export_extin(values):
+    v = []
+    for val in values:
+        v.append(val[0])
+    export_history('EXTIN_HISTORY', v)
+    
+
+def export_pushsw(values):
+    v = []
+    for val in values:
+        v.append(val[0])
+    export_history('PUSHSW_HISTORY', v)
+    
+
+def export_voltage(values):
+    v = [[], [], []]
+    for val in values:
+        for i in range(3):
+            v[i].append(val[i])
+    export_history('VOLTAGE_HISTORY', v[0])
+    export_history('VOLTAGE1_HISTORY', v[1])
+    export_history('VOLTAGE2_HISTORY', v[2])
+    
 
 
 def is_over(value, threshold):
@@ -144,10 +184,6 @@ def read_configure(path):
     return conf
 
 def main(args):
-    voltage_history = []
-    pushsw_history = []
-    extin_history = []
-    
     if '-D' in args:
         loop = True
     else:
@@ -166,6 +202,8 @@ def main(args):
     
     interval = configs['common']['interval']
     for key in CONFIG_MONITORS:
+        if not key in configs:
+            continue
         histsize = configs[key]['history_size']
         mon = Sleepi3Monitor(sleepi3, key, histsize)
         if not configs[key]['commands']:
@@ -177,7 +215,7 @@ def main(args):
     while True:
         for mon in monitors:
             mon.update_value()
-            ENV[mon.export] = "{}".format(mon.values)[1:-1]
+            mon.export(mon.values)
             for ev in mon.events:
                 if ev.is_triggered(mon.values[0]):
                     ev.do_action(ENV)
