@@ -1,3 +1,9 @@
+sleepi3-monitor (1.2.0) buster; urgency=medium
+
+  * Add channel parameter to configuration
+
+ -- Masahiro Honda <honda@mechatrax.com>  Fri, 06 Nov 2020 16:03:15 +0900
+
 sleepi3-monitor (1.1.1) buster; urgency=medium
 
   * Fix examples
