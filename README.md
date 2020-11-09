@@ -17,7 +17,7 @@ slee-Pi 3 のパワーマネジメントモジュールを監視するための�
 * -D
   デーモンとして動作します。
 
-### /etc/sleepi3/monitor.yml  
+### /etc/sleepi3-monitor/monitor.yml  
 slee-Pi 3 の監視動作の設定を行うための YAML ファイルです。  
 設定可能な項目は各セクションに分かれています。
 
@@ -112,14 +112,20 @@ slee-Pi 3 の監視動作の設定を行うための YAML ファイルです。
       実行条件が満たされた場合に command を一度だけ実行するには true を指定します。    
       実行条件が満たされている場合に command を繰り返し実行するには false を指定します。
 
-### /etc/sleepi3/extin.d/
+### /etc/sleepi3-monitor/extin.d/
 extin セクションの実行コマンドのデフォルトディレクトリです。
 
-### /etc/sleepi3/switch.d/
+### /etc/sleepi3-monitor/switch.d/
 switch セクションの実行コマンドのデフォルトディレクトリです。
 
-### /etc/sleepi3/voltage.d/
+### /etc/sleepi3-monitor/voltage.d/
 voltage セクションの実行コマンドのデフォルトディレクトリです。
+
+### /etc/sleepi3-monitor/voltage-1.d/
+voltage セクションの channel 1 の実行コマンドのデフォルトディレクトリです。
+
+### /etc/sleepi3-monitor/voltage-2.d/
+voltage セクションの channel 2 の実行コマンドのデフォルトディレクトリです。
 
 ### /lib/systemd/system/sleepi3-monitor.service  
 slee-Pi 3 の監視サービスを実行するためのファイルです。  
