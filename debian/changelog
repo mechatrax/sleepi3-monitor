@@ -1,3 +1,9 @@
+sleepi3-monitor (1.3.0) buster; urgency=medium
+
+  * Add THRESHOLD to exported environment variables
+
+ -- Masahiro Honda <honda@mechatrax.com>  Wed, 18 Nov 2020 19:09:26 +0900
+
 sleepi3-monitor (1.2.0) buster; urgency=medium
 
   * Add channel parameter to configuration

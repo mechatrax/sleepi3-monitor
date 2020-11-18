@@ -1,7 +1,6 @@
 #!/bin/bash
 
 WAIT=3
-THRESHOLD=10000
 
 source /usr/lib/sleepi3-monitor/parse_env.sh
 
