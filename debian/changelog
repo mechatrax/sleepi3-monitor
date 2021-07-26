@@ -1,3 +1,14 @@
+sleepi3-monitor (1.4.0) bullseye; urgency=medium
+
+  * debian/compat: Deleted
+  * debian/control
+    - Change Build-Depends to debhelper-compat from debhelper
+    - Bump Standards-Version to 4.5.1
+  * sleepi3mon
+    - Fix YAMLLoadWarning
+
+ -- Yuta Kiyonaga <kiyonaga@mechatrax.com>  Tue, 20 Jul 2021 08:45:00 +0000
+
 sleepi3-monitor (1.3.1) buster; urgency=medium
 
   * Modify examples
