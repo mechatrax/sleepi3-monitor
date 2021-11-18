@@ -18,7 +18,7 @@ pushsw:
       oneshot: true
 
 voltage:
-  history_size: 10
+  history_size: 3
   commands:
     - exec: /etc/sleepi3-monitor/voltage.d/
       condition: under
