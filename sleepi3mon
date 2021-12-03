@@ -10,7 +10,7 @@ import yaml
 import sleepi
 
 
-PROGRAM_VERSION = '1.5'
+PROGRAM_VERSION = '1.4'
 
 ENV_FILE = '/etc/default/sleepi3'
 DEFAULT_I2C_ADDRESS = '0x6E'
