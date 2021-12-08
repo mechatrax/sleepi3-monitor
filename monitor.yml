@@ -24,13 +24,19 @@ voltage:
       condition: under
       threshold: 0
       oneshot: true
+
+voltage1:
+  history_size: 3
+  commands:
     - exec: /etc/sleepi3-monitor/voltage-1.d/
-      channel: 1
       condition: under
       threshold: 0
       oneshot: true
+
+voltage2:
+  history_size: 3
+  commands:
     - exec: /etc/sleepi3-monitor/voltage-2.d/
-      channel: 2
       condition: under
       threshold: 0
       oneshot: true

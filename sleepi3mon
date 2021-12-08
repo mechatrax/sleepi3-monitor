@@ -10,7 +10,7 @@ import yaml
 import sleepi
 
 
-PROGRAM_VERSION = '1.4'
+PROGRAM_VERSION = '2.0'
 
 ENV_FILE = '/etc/default/sleepi3'
 DEFAULT_I2C_ADDRESS = '0x6E'
@@ -24,12 +24,13 @@ class Event(object):
         self.exec = config['exec']
         self.threshold = config['threshold'] if 'threshold' in config else 0
         self.oneshot = config['oneshot'] if 'oneshot' in config else False
-        self.channel = config['channel'] if 'channel' in config and config['channel'] in (1, 2) else 0
         self.done = False
     
     def is_triggered(self, mon):
-        val = mon.get_value(self.channel)
-        result = self.check_value(val)
+        vals = mon.get_values()
+        if len(vals) < mon.histsize:
+            return False
+        result = self.check_values(vals)
         if self.oneshot:
             if not result:
                 self.done = False
@@ -58,27 +59,29 @@ class Event(object):
     
 
 class EventOver(Event):
-    def check_value(self, value):
-        if value >= self.threshold:
-            return 1
-        return 0
+    def check_values(self, values):
+        for val in values:
+            if val < self.threshold:
+                return False
+        return True
     
 
 class EventUnder(Event):
-    def check_value(self, value):
-        if value <= self.threshold:
-            return 1
-        return 0
+    def check_values(self, values):
+        for val in values:
+            if val > self.threshold:
+                return False
+        return True
     
 
 class EventAny(Event):
-    def check_value(self, value):
-        return 1
+    def check_values(self, values):
+        return True
     
 
 class EventNone(Event):
-    def check_value(self, value):
-        return 0
+    def check_values(self, values):
+        return False
     
 
 class Sleepi3Monitor(object):
@@ -112,8 +115,8 @@ class Sleepi3ExtinMonitor(Sleepi3Monitor):
         }
         return hist
     
-    def get_value(self, channel):
-        return self.values[0]
+    def get_values(self):
+        return self.values
     
 
 class Sleepi3PushswMonitor(Sleepi3Monitor):
@@ -130,8 +133,8 @@ class Sleepi3PushswMonitor(Sleepi3Monitor):
         }
         return hist
     
-    def get_value(self, channel):
-        return self.values[0]
+    def get_values(self):
+        return self.values
     
 
 class Sleepi3VoltageMonitor(Sleepi3Monitor):
@@ -142,23 +145,53 @@ class Sleepi3VoltageMonitor(Sleepi3Monitor):
         v1 = self.sleepi3.registers['voltage1'].value
         v2 = self.sleepi3.registers['voltage2'].value
         v = v1 if v1 > v2 else v2
-        return [v, v1, v2]
+        return v
     
     def get_history(self):
         hist = {
+            'VOLTAGE_HISTORY': to_history(self.values),
             'VOLTAGE_HISTORY_SIZE': str(self.histsize)
         }
-        v = [[], [], []]
-        for val in self.values:
-            for i in range(3):
-                v[i].append(val[i])
-        hist.update({'VOLTAGE_HISTORY': to_history(v[0])})
-        hist.update({'VOLTAGE1_HISTORY': to_history(v[1])})
-        hist.update({'VOLTAGE2_HISTORY': to_history(v[2])})
         return hist
     
-    def get_value(self, channel):
-        return self.values[0][channel]
+    def get_values(self):
+        return self.values
+    
+
+class Sleepi3Voltage1Monitor(Sleepi3Monitor):
+    def __init__(self, sleepi3, histsize):
+        super().__init__(sleepi3, 'voltage1', histsize)
+    
+    def read_register(self):
+        return self.sleepi3.registers['voltage1'].value
+    
+    def get_history(self):
+        hist = {
+            'VOLTAGE1_HISTORY': to_history(self.values),
+            'VOLTAGE1_HISTORY_SIZE': str(self.histsize)
+        }
+        return hist
+    
+    def get_values(self):
+        return self.values
+    
+
+class Sleepi3Voltage2Monitor(Sleepi3Monitor):
+    def __init__(self, sleepi3, histsize):
+        super().__init__(sleepi3, 'voltage2', histsize)
+    
+    def read_register(self):
+        return self.sleepi3.registers['voltage2'].value
+    
+    def get_history(self):
+        hist = {
+            'VOLTAGE2_HISTORY': to_history(self.values),
+            'VOLTAGE2_HISTORY_SIZE': str(self.histsize)
+        }
+        return hist
+    
+    def get_values(self):
+        return self.values
     
 
 def to_history(values):
@@ -202,7 +235,9 @@ def main(args):
     monitor_type = {
         'extin': Sleepi3ExtinMonitor,
         'pushsw': Sleepi3PushswMonitor,
-        'voltage': Sleepi3VoltageMonitor
+        'voltage': Sleepi3VoltageMonitor,
+        'voltage1': Sleepi3Voltage1Monitor,
+        'voltage2': Sleepi3Voltage2Monitor
     }
     event_type = {
         'any': EventAny,
@@ -231,11 +266,23 @@ def main(args):
     for key in monitor_type.keys():
         if not key in configs:
             continue
-        histsize = configs[key]['history_size']
-        mon = monitor_type[key](sleepi3, histsize)
         if not configs[key]['commands']:
             continue
+        if not 'history_size' in configs[key]:
+            histsize = 1
+        else:
+            histsize = configs[key]['history_size']
+        mon = monitor_type[key](sleepi3, histsize)
         for cmd in configs[key]['commands']:
+            if 'channel' in cmd:
+                # for compatibility
+                ch = cmd['channel']
+                if not ch in (1, 2):
+                    continue
+                vmon = monitor_type["voltage{}".format(ch)](sleepi3, histsize)
+                vmon.add_event(event_type[cmd['condition']](cmd))
+                monitors.append(vmon)
+                continue
             mon.add_event(event_type[cmd['condition']](cmd))
         monitors.append(mon)
     
