@@ -79,8 +79,11 @@ slee-Pi 3 の監視動作の設定を行うための YAML ファイルです。
       true または false を指定します。  
       実行条件が満たされた場合に command を一度だけ実行するには true を指定します。    
       実行条件が満たされている場合に command を繰り返し実行するには false を指定します。  
-* voltage  
+* voltage, voltage1, voltage2  
   電源電圧の監視動作を設定するセクションです。  
+  voltage : 現在の入力電圧の値を監視します。  
+  voltage1 : CN1 の入力電圧の値を監視します。  
+  voltage2 : CN2 の入力電圧の値を監視します。  
   - history_size  
     履歴に保持する値の数です。  
   - commands  
@@ -90,11 +93,6 @@ slee-Pi 3 の監視動作の設定を行うための YAML ファイルです。
       条件を満たした場合に実行されるコマンドです。  
       ファイルを指定した場合には実行可能なファイルを実行します。  
       ディレクトリを指定した場合は指定したディレクトリに存在する実行可能なファイルを実行します。
-    + channel  
-      検出する電圧のチャンネルを指定します。  
-      CN1 を検出する場合は 1 を指定します。  
-      CN2 を検出する場合は 2 を指定します。  
-      指定しない場合は CN1, CN2 の高いほうの電圧が検出されます。
     + condition  
       コマンドの実行条件を設定します。  
       over, under, any, none のいずれかを指定します。  
@@ -122,10 +120,10 @@ switch セクションの実行コマンドのデフォルトディレクトリ�
 voltage セクションの実行コマンドのデフォルトディレクトリです。
 
 ### /etc/sleepi3-monitor/voltage-1.d/
-voltage セクションの channel 1 の実行コマンドのデフォルトディレクトリです。
+voltage1 セクションの実行コマンドのデフォルトディレクトリです。
 
 ### /etc/sleepi3-monitor/voltage-2.d/
-voltage セクションの channel 2 の実行コマンドのデフォルトディレクトリです。
+voltage2 セクションの実行コマンドのデフォルトディレクトリです。
 
 ### /lib/systemd/system/sleepi3-monitor.service  
 slee-Pi 3 の監視サービスを実行するためのファイルです。  
