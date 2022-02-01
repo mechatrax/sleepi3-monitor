@@ -10,7 +10,7 @@ import yaml
 import sleepi
 
 
-PROGRAM_VERSION = '2.0'
+PROGRAM_VERSION = '2.1'
 
 ENV_FILE = '/etc/default/sleepi3'
 DEFAULT_I2C_ADDRESS = '0x6E'
@@ -223,7 +223,7 @@ def read_configure(path):
     
     try: 
         with open(path, 'r') as file:
-            conf = yaml.full_load(file)
+            conf = yaml.safe_load(file)
     except IOError as e:
         print("Cannot access {}.".format(path))
         exit(e)
