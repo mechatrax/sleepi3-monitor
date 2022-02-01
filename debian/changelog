@@ -1,3 +1,9 @@
+sleepi3-monitor (2.1.0) bullseye; urgency=medium
+
+  * Modify sleepi3mon
+
+ --  <kiyonaga@mechatrax.com>  Tue, 01 Feb 2022 19:36:35 +0900
+
 sleepi3-monitor (2.0.0) bullseye; urgency=medium
 
   * sleepi3mon
