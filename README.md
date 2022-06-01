@@ -113,8 +113,8 @@ slee-Pi 3 の監視動作の設定を行うための YAML ファイルです。
 ### /etc/sleepi3-monitor/extin.d/
 extin セクションの実行コマンドのデフォルトディレクトリです。
 
-### /etc/sleepi3-monitor/switch.d/
-switch セクションの実行コマンドのデフォルトディレクトリです。
+### /etc/sleepi3-monitor/pushsw.d/
+pushsw セクションの実行コマンドのデフォルトディレクトリです。
 
 ### /etc/sleepi3-monitor/voltage.d/
 voltage セクションの実行コマンドのデフォルトディレクトリです。
