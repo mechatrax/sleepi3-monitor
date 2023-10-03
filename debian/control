@@ -2,8 +2,9 @@ Source: sleepi3-monitor
 Section: misc
 Priority: optional
 Maintainer: Yuta Kiyonaga <kiyonaga@mechatrax.com>
+Uploaders: Masahiro Honda <honda@mechatrax.com>
 Build-Depends: debhelper-compat (= 12)
-Standards-Version: 4.5.1
+Standards-Version: 4.6.2
 Vcs-Git: https://github.com/mechatrax/sleepi3-monitor.git
 Vcs-browser: https://github.com/mechatrax/sleepi3-monitor
 Homepage: https://mechatrax.com/
