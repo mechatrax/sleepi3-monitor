@@ -1,3 +1,10 @@
+sleepi3-monitor (2.1.0.2) bookworm; urgency=medium
+
+  * debian/postinst: Added
+  * debian/copyright: Update contact information
+
+ -- Yuta Kiyonaga <kiyonaga@mechatrax.com>  Fri, 08 Dec 2023 11:22:58 +0900
+
 sleepi3-monitor (2.1.0.1) bookworm; urgency=medium
 
   * debian/control

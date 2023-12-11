@@ -1,9 +1,10 @@
 Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
 Upstream-Name: sleepi3-monitor
+Upstream-Contact: https://github.com/mechatrax/sleepi3-monitor/issues
 Source: https://github.com/mechatrax/sleepi3-monitor
 
 Files: *
-Copyright: 2020 MechaTracks Co., Ltd. <info@mechatrax.com>
+Copyright: 2020 MechaTracks Co., Ltd.
 License: MIT
 
 License: MIT
