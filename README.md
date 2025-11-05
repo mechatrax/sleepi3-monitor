@@ -125,7 +125,7 @@ voltage1 セクションの実行コマンドのデフォルトディレクト�
 ### /etc/sleepi3-monitor/voltage-2.d/
 voltage2 セクションの実行コマンドのデフォルトディレクトリです。
 
-### /lib/systemd/system/sleepi3-monitor.service  
+### /usr/lib/systemd/system/sleepi3-monitor.service  
 slee-Pi 3 の監視サービスを実行するためのファイルです。  
 sleepi3mon をデーモンとして動作させます。
 
